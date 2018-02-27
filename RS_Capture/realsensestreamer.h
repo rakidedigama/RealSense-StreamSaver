@@ -27,6 +27,9 @@ private:
     cv::Mat processed_dist_frame;
     bool m_bDistFrameUpdated;
 
+    Ptr<BackgroundSubtractor> pMOG;
+    bool m_BGsubtraction;
+
 signals:
 
     void gotDepthFrame(cv::Mat depth);

@@ -39,13 +39,14 @@ RealSenseStreamer::RealSenseStreamer(QObject *parent):QObject(parent)
     dConverter->moveToThread(depthConverterThread);
     depthConverterThread->start();
 
-    //pMOG = createBackgroundSubtractorMOG2(200,16,false);
+    pMOG = createBackgroundSubtractorMOG2(200,16,false);
 
-    m_bProcessByDistance = true ; // select
+    m_bProcessByDistance = false ; // select
 
   processed_depth_frame = 0;
   m_bDepthFrameUpdated = false;
    m_bDistFrameUpdated = false;
+    m_BGsubtraction = false;
 
 
     qRegisterMetaType< cv::Mat >("cv::Mat");
@@ -78,12 +79,26 @@ int RealSenseStreamer::runStream() {
         cv::VideoWriter oVideoWriterC(fileNameC.toStdString(), CV_FOURCC('F','M','P','4'), 10, frameSizeC,true);
 
      std::cout<<"Start streaming" << std::endl;
+     std::string input;
+     std::cout <<"Enter b for BG subtraction, or N for not" << std::endl;
+     std::cin>>input ;
+     if(input=="b"){
+         std::cout << "Do background subtraction" <<std::endl;
+         m_BGsubtraction = true;
+     }
+     if(input=="o"){
+         m_BGsubtraction = false;
+     }
+     else{
+         exit(0);
+     }
+
     while(app) // Application still alive?
     {
         if ( !oVideoWriterG.isOpened() && !oVideoWriterC.isOpened() )
         {
             std::cout << "ERROR: Failed to write the video" << std::endl;
-         }
+        }
 
        rs2::frameset data = pipe.wait_for_frames(); // Wait for next set of frames from the camera
        rs2::depth_frame depth_frame = data.get_depth_frame();
@@ -94,25 +109,32 @@ int RealSenseStreamer::runStream() {
        int width = depth_frame.get_width();
        int height = depth_frame.get_height();
 
-       std::cout<<"Depth Frame Width : " << width << "Height : " << height << std::endl;
+      // std::cout<<"Depth Frame Width : " << width << "Height : " << height << std::endl;
+
+       QTime timer;
 
 
 
-       //Mat grayDepthFrameResized(480,640,CV_8UC3);
+       // Depth Stream
+
        if(m_bProcessByDistance){
             emit convertDepthFrameToDistance(depth_frame);
+            timer.start();
            std::cout<<"Emit frame : Get distance Frame" << std::endl;
            if(m_bDistFrameUpdated){
-                 m_bDistFrameUpdated = false; // reset frame update flag
-                std::cout<<"Got processed depth frame in streamer" << std::endl;
+                std::cout<<"Got processed depth frame in streamer : " << timer.elapsed() << " ms"  << std::endl;
                  cv::imshow(WINDOW_NAME_1,processed_dist_frame);
+                 m_bDistFrameUpdated = false; // reset frame update flag
            }
            else{
-                 //std::cout<<"Waiting for processed depth frame" << std::endl;
+               if(!processed_dist_frame.empty())
+                    cv::imshow(WINDOW_NAME_1,processed_dist_frame);
             }
 
 
        }
+
+
        else{
            Mat openDepth((Size(width, height)), CV_16UC1, (void*)depth.get_data(), Mat::AUTO_STEP);
            std::cout<<"Emit frame" << std::endl;
@@ -121,17 +143,23 @@ int RealSenseStreamer::runStream() {
                if(m_bDepthFrameUpdated){
                      m_bDepthFrameUpdated = false; // reset frame update flag
                     std::cout<<"Got processed depth frame in streamer" << std::endl;
-                    cv::imshow(WINDOW_NAME_1,processed_depth_frame);
+                    if(m_BGsubtraction){
+                         Mat fgMaskMOG2;
+                         pMOG->apply(processed_depth_frame, fgMaskMOG2);
+                          cv::imshow(WINDOW_NAME_1,fgMaskMOG2);
+                    }
+                    else{
+                        cv::imshow(WINDOW_NAME_1,processed_depth_frame);
+                    }
+
                }
                else{
                      //std::cout<<"Waiting for processed depth frame" << std::endl;
                 }
-//           }
-
-
-           //Mat oDepthOut = dConverter->processDepthFrame(openDepth);
 
        }
+
+       // Color Stream
 
        Mat openColor((Size(640, 480)), CV_8UC3, (void*)color.get_data(), Mat::AUTO_STEP);
        Mat openColorCvt(480,640,CV_8UC3);
