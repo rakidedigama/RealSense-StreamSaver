@@ -22,6 +22,8 @@ LIBS += glu32.lib
 
 LIBS +=  "C:/BUILDS/glfw-3.2.1/src/Debug/glfw3dll.lib"
 
+
+debug {
 LIBS += C:/BUILDS/openCV/lib/Debug/opencv_core330d.lib
 LIBS += C:/BUILDS/openCV/lib/Debug/opencv_highgui330d.lib
 LIBS +=C:/BUILDS/openCV/lib/Debug/opencv_imgcodecs330d.lib
@@ -30,20 +32,35 @@ LIBS += C:/BUILDS/openCV/lib/Debug/opencv_calib3d330d.lib
 LIBS += C:/BUILDS/openCV/lib/Debug/opencv_video330d.lib
 LIBS += C:/BUILDS/openCV/lib/Debug/opencv_videoio330d.lib
 LIBS += C:/BUILDS/openCV/lib/Debug/opencv_videostab330d.lib
+}
+
+release {
+LIBS += C:/BUILDS/openCV/lib/Release/opencv_core330.lib
+LIBS += C:/BUILDS/openCV/lib/Release/opencv_highgui330.lib
+LIBS +=C:/BUILDS/openCV/lib/Release/opencv_imgcodecs330.lib
+LIBS += C:/BUILDS/openCV/lib/Release/opencv_imgproc330.lib
+LIBS += C:/BUILDS/openCV/lib/Release/opencv_calib3d330.lib
+LIBS += C:/BUILDS/openCV/lib/Release/opencv_video330.lib
+LIBS += C:/BUILDS/openCV/lib/Release/opencv_videoio330.lib
+LIBS += C:/BUILDS/openCV/lib/Release/opencv_videostab330.lib
+}
 
 
 
 
 
-INCLUDEPATH += "C:/dev/Intel RealSense SDK 2/include/librealsense2/" \
-                "C:/dev/Intel RealSense SDK 2/examples" \
+
+
+
+INCLUDEPATH += "C:/dev/IntelRealSenseSDK2/include/librealsense2/" \
+                "C:/dev/IntelRealSenseSDK2/examples" \
                 C:/dev/glfw-3.2.1/include \
                  C:\BUILDS\openCV\install\include \
 
-HEADERS += "C:/dev/Intel RealSense SDK 2/examples/example.hpp" \
+HEADERS += "C:/dev/IntelRealSenseSDK2/examples/example.hpp" \
          "C:/dev/glfw-3.2.1/include/GLFW/glfw3.h" \
             depthconverter.h \
-            "C:/dev/Intel RealSense SDK 2/include/librealsense2/rs.hpp" \
+            "C:/dev/IntelRealSenseSDK2/include/librealsense2/rs.hpp" \
     realsensestreamer.h
 
 

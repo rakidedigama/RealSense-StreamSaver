@@ -30,6 +30,9 @@ private:
     Ptr<BackgroundSubtractor> pMOG;
     bool m_BGsubtraction;
 
+    rs2_stream find_stream_to_align(const std::vector<rs2::stream_profile>& streams);
+    float get_depth_scale(rs2::device dev);
+    bool profile_changed(const std::vector<rs2::stream_profile>& current, const std::vector<rs2::stream_profile>& prev);
 signals:
 
     void gotDepthFrame(cv::Mat depth);
@@ -40,6 +43,9 @@ signals:
 public slots:
    void updateDepthFrame(cv::Mat newDepthFrame);
    void updateDistanceFrame(cv::Mat newDistFrame);
+
+
+
 };
 
 #endif // REALSENSESTREAMER_H
